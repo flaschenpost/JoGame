@@ -1,14 +1,14 @@
-OUT = sdltest
+OUT = sdlmove
 CXX = g++
 SDL = -lSDLmain -lSDL -lSDL_image -lsfmt
 
-OBJECTS = sdltest.o
+OBJECTS = sdlmove.o
 
-sources = sdltest.cpp
+sources = sdlmove.cpp
 
 all: $(OUT)
 
 $(OUT): $(OBJECTS)
 		$(CXX) ${SDL} -o $(OUT) $(OBJECTS)
 
-OBJECTS = sdltest.cpp
+OBJECTS = sdlmove.cpp
