@@ -28,6 +28,8 @@ int main ( int argc, char *argv[] )
   SDL_Surface *sprite = SDL_DisplayFormat(temp);
   /* free the temp surface */
   SDL_FreeSurface(temp);
+  log << rcSprite.w << " "<< rcSprite.h << "\n";
+  return 1;
 
   
   uint32_t width = screenW - sprite->w;
@@ -62,12 +64,15 @@ int main ( int argc, char *argv[] )
     Uint32 diff = now - lastTime;
     log << "diff = " << diff << "\n";
     lastTime = now;
+
     rcSprite.x += speedX * diff / 100;
     rcSprite.y += speedY * diff / 100;
+
     if(rcSprite.x >= width){
       speedX = -speedX;
       rcSprite.x -= speedX * diff / 10000;
     }
+
     if(rcSprite.y >= height){
       speedY = -speedY;
       rcSprite.y -= speedY * diff / 10000;
@@ -80,6 +85,7 @@ int main ( int argc, char *argv[] )
     SDL_UpdateRect(screen, 0, 0, 0, 0);
 
     /* look for an event */
+
     if (SDL_PollEvent(&event)) {
       /* an event was found */
       switch (event.type) {
