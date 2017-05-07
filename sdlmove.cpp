@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include <unistd.h>
 using namespace std;
 
@@ -10,49 +10,52 @@ using namespace std;
 
 int main ( int argc, char *argv[] )
 {
+  /* initialize SDL */
+  SDL_Init(SDL_INIT_VIDEO);
+
   ofstream log;
   log.open("log.txt", ios::out);
 
-  SDL_Surface *screen, *temp, *sprite, *background;
+
+  SDL_Window *screen = SDL_CreateWindow("JoGame00",
+      SDL_WINDOWPOS_UNDEFINED,
+      SDL_WINDOWPOS_UNDEFINED,
+      SCREEN_WIDTH, SCREEN_HEIGHT,
+      SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL);
+
+  SDL_Renderer *renderer = SDL_CreateRenderer(screen, -1, 0);
+
   SDL_Rect rcSprite, rcOld, rcBackground;
   SDL_Event event;
   Uint8 *keystate;
 
-  int colorkey, gameover;
+  int gameover;
 
-  /* initialize SDL */
-  SDL_Init(SDL_INIT_VIDEO);
-
-  /* set the title bar */
-  SDL_WM_SetCaption("SDL Test", "SDL Test");
-
-  /* create window */
-  screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
 
   /* load sprite */
-  temp   = IMG_Load("kopp.png");
-  sprite = SDL_DisplayFormat(temp);
+  IMG_Init(IMG_INIT_PNG);
+  SDL_Surface *temp   = IMG_Load("kopp.png");
+  SDL_Texture *sprite = SDL_CreateTextureFromSurface(renderer, temp);
   SDL_FreeSurface(temp);
+
+  SDL_QueryTexture(sprite, NULL, NULL, &rcSprite.w, &rcSprite.h);
   log << rcSprite.w << " "<< rcSprite.h << "\n";
 
-  rcSprite.w = sprite->w;
-  rcSprite.h = sprite->h;
-
   /* setup sprite colorkey and turn on RLE */
-  colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
-  SDL_SetColorKey(sprite, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+  SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0xFF, 0xFF);
 
   /* load background */
   temp  = IMG_Load("back.png");
-  background = SDL_DisplayFormat(temp);
+  SDL_Texture *background = SDL_CreateTextureFromSurface(renderer, temp);
   SDL_FreeSurface(temp);
+  IMG_Quit();
 
   double posX = 100.0;
   double posY = 80.0;
 
   
-  uint32_t width = SCREEN_WIDTH - sprite->w;
-  uint32_t height = SCREEN_HEIGHT - sprite->h;
+  uint32_t width = SCREEN_WIDTH - rcSprite.w;
+  uint32_t height = SCREEN_HEIGHT - rcSprite.h;
 
   srand(12643l);
 
@@ -68,16 +71,13 @@ int main ( int argc, char *argv[] )
   Uint32 lastTime = SDL_GetTicks(); 
   rcBackground.x = 0;
   rcBackground.y = 0;
-  rcBackground.w = background->w;
-  rcBackground.h = background->h;
+  SDL_QueryTexture(sprite, NULL, NULL, &rcBackground.w, &rcBackground.h);
 
-  SDL_BlitSurface(background, NULL, screen, &rcBackground);
+  SDL_RenderCopy(renderer, background, NULL, NULL);
 
-    /* draw the sprite */
-    SDL_BlitSurface(sprite, NULL, screen, &rcSprite);
-
-    /* update the screen */
-    SDL_UpdateRect(screen, 0, 0, 0, 0);
+  /* draw the sprite */
+  SDL_RenderCopy(renderer, sprite, NULL, &rcSprite);
+  SDL_RenderPresent(renderer);
 
   gameover = 0;
 
@@ -157,17 +157,13 @@ int main ( int argc, char *argv[] )
 
 
     /* draw the sprite */
-    SDL_BlitSurface(background, NULL, screen, &rcBackground);
-    SDL_BlitSurface(sprite, NULL, screen, &rcSprite);
+    SDL_RenderCopy(renderer, background, NULL, NULL);
+    SDL_RenderCopy(renderer, sprite, NULL, &rcSprite);
+    SDL_RenderPresent(renderer);
 
-    /* update the screen */
-    //  SDL_UpdateRect(screen, 0, 0, 0, 0);
-    SDL_UpdateRect(screen, rcOld.x, rcOld.y, rcSprite.w, rcSprite.h);
   }
 
   log.close();
-  /* free the background surface */
-  SDL_FreeSurface(sprite);
 
   /* cleanup SDL */
   SDL_Quit();

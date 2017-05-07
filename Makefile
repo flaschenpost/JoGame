@@ -1,14 +1,9 @@
-OUT = sdlmove
-CXX = g++
-SDL = -lSDLmain -lSDL -lSDL_image -lsfmt
+LIBS = -lSDL2main -lSDL2 -lSDL2_image -lsfmt
+CFLAGS = -Wall
 
-OBJECTS = sdlmove.o
+OBJS = $($SRC:.cpp=.o)
 
-sources = sdlmove.cpp
+SRC = sdlmitsu.cpp
 
-all: $(OUT)
-
-$(OUT): $(OBJECTS)
-		$(CXX) ${SDL} -o $(OUT) $(OBJECTS)
-
-OBJECTS = sdlmove.cpp
+sdlmitsu: sdlmitsu.cpp
+		g++ -o $@ $^ $(CFLAGS) $(LIBS)
